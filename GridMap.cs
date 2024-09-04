@@ -18,6 +18,7 @@ public class GridMap : MonoBehaviour
     
     }
 
+//metodo para dibujar el grid
     private void DibujarGrid()
     {
         for (int x = 0; x < gridSize; x++)
@@ -30,8 +31,10 @@ public class GridMap : MonoBehaviour
                 cube.transform.position = position;
                 cube.name = $"Node ({x},{y})";
 
+                // Alternar colores para crear un patron alternado
+                Color color = (x + y) % 2 == 0 ? Color.black: Color.gray;
                 Renderer cubeRenderer = cube.GetComponent<Renderer>();
-                cubeRenderer.material.color = Color.cyan;
+                cubeRenderer.material.color = color;
             }
         }
     }
