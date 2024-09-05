@@ -1,0 +1,78 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class Player : MonoBehaviour
+{
+
+    //atributos
+
+    private Vector2 targetPosition; //vector unitario para mantener el target de donde deberia posicionarse
+    private float xInput, yInput;
+
+    [SerializeField] private float speed = 0.15f; //maneja la rapidez del jugador
+
+    private Rigidbody2D playerRB; //RigidBody del player
+    private Vector2 moveInput; //recibe los inputs para mover
+
+    //metodos
+
+    // Start is called before the first frame update
+    void Start() //inicia todo
+    {
+        playerRB = GetComponent<Rigidbody2D>(); //asigna el RigidBody
+        moveInput = Vector2.up; //inicia con una direcion predeterminada
+    }
+
+    // Update is called once per frame
+    void Update() //actualiza lo que ocurre
+    {
+        xInput = Input.GetAxisRaw("Horizontal"); //obtiene inputs para el movimiento en x (recibe 1)
+        yInput = Input.GetAxisRaw("Vertical"); // mismo pero vertical (recibe -1)
+
+        if (xInput != 0f || yInput != 0f) //si la entrada x || y es distinta a 0 
+        {
+            CalcularTargetPosition();
+        }
+        moveInput = new Vector2(xInput, yInput); //asigna al vector los inputs
+    }
+
+    private void FixedUpdate() //intervalos de actualizacion fijas
+    {
+        //fisicas van aqui para evitar que el cambio del framerate afecte
+        playerRB.MovePosition(playerRB.position + moveInput *speed); //obtiene la posicion, le suma el vector multiplicado por la velocidad
+
+    }
+
+    private void CalcularTargetPosition()
+    {
+        if(xInput == 1f)
+        {
+            targetPosition = (Vector2)transform.position + Vector2.right;
+        }
+
+        else if (xInput ==-1f)
+        {
+            targetPosition = (Vector2)transform.position + Vector2.left;
+        }
+
+        else if (yInput ==1f)
+        {
+            targetPosition = (Vector2)transform.position + Vector2.up;
+        }
+
+        else if (yInput == -1f)
+        {
+            targetPosition = (Vector2)transform.position + Vector2.down;
+        }
+
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(targetPosition, 0.15f);
+    }
+}
