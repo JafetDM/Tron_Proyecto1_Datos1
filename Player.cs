@@ -1,8 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
@@ -10,9 +14,12 @@ public class Player : MonoBehaviour
     //atributos
 
     private Vector2 targetPosition; //vector unitario para mantener el target de donde deberia posicionarse
-    private float xInput, yInput;
+    private float xInput, yInput; //
 
-    [SerializeField] private float speed = 0.15f; //maneja la rapidez del jugador
+    private Boolean isFacingUp = true;
+    private Boolean isFacingRight = true;
+
+    [SerializeField] private float speed = 3f; //maneja la rapidez del jugador
 
     private Rigidbody2D playerRB; //RigidBody del player
     private Vector2 moveInput; //recibe los inputs para mover
@@ -31,18 +38,47 @@ public class Player : MonoBehaviour
     {
         xInput = Input.GetAxisRaw("Horizontal"); //obtiene inputs para el movimiento en x (recibe 1)
         yInput = Input.GetAxisRaw("Vertical"); // mismo pero vertical (recibe -1)
-
+        
         if (xInput != 0f || yInput != 0f) //si la entrada x || y es distinta a 0 
         {
             CalcularTargetPosition();
         }
-        moveInput = new Vector2(xInput, yInput); //asigna al vector los inputs
+
+        else
+        {
+            targetPosition = moveInput;
+        }
+        
+        //ahora se cambia la direccion dependiendo del input
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            moveInput = Vector2.up;
+            flip();
+        }
+
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            moveInput = Vector2.down;
+            flip();
+        }
+
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            moveInput = Vector2.left;
+            flip();
+        }
+
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            moveInput = Vector2.right;
+            flip();
+        }
     }
 
     private void FixedUpdate() //intervalos de actualizacion fijas
     {
         //fisicas van aqui para evitar que el cambio del framerate afecte
-        playerRB.MovePosition(playerRB.position + moveInput *speed); //obtiene la posicion, le suma el vector multiplicado por la velocidad
+        playerRB.MovePosition(playerRB.position + moveInput *speed * Time.fixedDeltaTime); //obtiene la posicion, le suma el vector multiplicado por la velocidad
 
     }
 
@@ -75,4 +111,30 @@ public class Player : MonoBehaviour
     {
         Gizmos.DrawWireSphere(targetPosition, 0.15f);
     }
+
+    private void flip()
+    {
+        if (yInput == -1f && isFacingUp)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 90f); //lo gira arriba
+            isFacingUp = false;
+        }
+        if (yInput == 1f && !isFacingUp)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, -90f); //lo gira abajo
+            isFacingUp = true;
+        }
+
+        if (xInput == -1f && isFacingRight)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f); //lo gira derecha
+            isFacingRight = false;
+        }
+
+        if (xInput == 1f && !isFacingRight)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 180f); //lo gira izquierda
+            isFacingRight = true;
+    }
+}
 }
