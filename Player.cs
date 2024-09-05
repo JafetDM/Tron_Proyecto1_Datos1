@@ -17,9 +17,9 @@ public class Player : MonoBehaviour
     private float xInput, yInput; //
 
     private Boolean isFacingUp = true;
-    private Boolean isFacingRight = true;
+    private Boolean isFacingRight = false;
 
-    [SerializeField] private float speed = 3f; //maneja la rapidez del jugador
+    [SerializeField] private float speed = 20f; //maneja la rapidez del jugador
 
     private Rigidbody2D playerRB; //RigidBody del player
     private Vector2 moveInput; //recibe los inputs para mover
@@ -48,7 +48,7 @@ public class Player : MonoBehaviour
         {
             targetPosition = moveInput;
         }
-        
+
         //ahora se cambia la direccion dependiendo del input
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
@@ -73,12 +73,25 @@ public class Player : MonoBehaviour
             moveInput = Vector2.right;
             flip();
         }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            speed = 40f;
+            Console.WriteLine("cambie");
+        }
+    
+        
+        
     }
 
     private void FixedUpdate() //intervalos de actualizacion fijas
     {
+
+
+        Vector2 normalizedMoveInput = moveInput.normalized;
+
         //fisicas van aqui para evitar que el cambio del framerate afecte
-        playerRB.MovePosition(playerRB.position + moveInput *speed * Time.fixedDeltaTime); //obtiene la posicion, le suma el vector multiplicado por la velocidad
+        playerRB.MovePosition(playerRB.position + normalizedMoveInput * speed * Time.fixedDeltaTime); //obtiene la posicion, le suma el vector multiplicado por la velocidad
 
     }
 
