@@ -2,15 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Xml;
 using System.Xml.Schema;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.VisualScripting;
+using UnityEditor.SearchService;
 using UnityEngine;
 
 namespace Tron
 {
-public class Node 
+public class Node //nodo para el grid
 {
     //atributos
      //informacion del nodo
@@ -40,14 +42,14 @@ public class Node
     
 }
 
-public class SimpleNode
+public class SimpleNode //nodo generalizado para objetos
 {
     // atributos
-    public int dato;
+    public object dato;
     public SimpleNode Next;
 
     //constructor
-    public SimpleNode(int data)
+    public SimpleNode(object data)
     {
         dato = data;
         Next = null;
@@ -55,19 +57,43 @@ public class SimpleNode
 
 }
 
-public class LinkedList
+public class LinkedList //lista generalizada para objetos
 {
     //atributos
 
     private SimpleNode head; //puntero cabeza que servira para recorrer la lista
+    public int size;
 
     //metodos
     public LinkedList()
     {
         head = null; //puntero cabeza inicia en el principio
+        size=0;
     }
 
-    public void Add(int data) //fmetodo que agrega nodos
+    public void InsertarI(object data)//metodo que inserta al inicio
+    {
+        //creamos el nuevo nodo
+        SimpleNode newNode = new SimpleNode(data); //crea el nuevo nodo
+
+        if (head == null) 
+        {
+            head = newNode; //asigna el nodo al principio
+        }
+
+        else
+        {
+            SimpleNode puntero; //creamos nodo para ayudarnos
+            puntero = head;
+            head = newNode;
+            newNode.Next = puntero;
+        }
+
+        size +=1;
+
+    }
+
+    public void InsertarF(object data) //metodo que agrega nodos al final
     {
         SimpleNode newNode = new SimpleNode(data); //crea el nuevo nodo
 
@@ -89,7 +115,36 @@ public class LinkedList
 
         }
 
+        size +=1;
+
     }
+
+    public void EliminarF()
+    {
+        if (head ==null)//si esta vacia
+        {
+            Console.WriteLine("lista esta vacia");
+            return;
+        }
+
+        if (head.Next==null) //si solo tiene un elemento
+        {
+            head = null;
+        }
+
+        else
+        {
+            SimpleNode puntero = head; //puntero para ayudar a recorrer
+            while (puntero.Next.Next != null)
+            {
+                puntero = puntero.Next;
+            }
+            puntero.Next =null; //despues de recorrer todo, elimina el ultimo
+        }
+
+        size -= 1;
+    }
+
 }
 
 public class GridLinkedList
