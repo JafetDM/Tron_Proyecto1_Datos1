@@ -29,8 +29,9 @@ public class Player : MonoBehaviour
     private Vector2 moveInput; //recibe los inputs para mover
 
     //atributos para la lista enlazada "estelaLuz"
-    private LinkedList estelaLuz;
-    private int estelaSize;
+    private LinkedList<Vector2> estelaLuz = new LinkedList<Vector2>();
+    private LinkedList<GameObject> spriteEstela = new LinkedList<GameObject>();
+    private int estelaSize =1;
 
 
 
@@ -38,7 +39,7 @@ public class Player : MonoBehaviour
 
 
 
-    //metodos
+    //Metodos
 
     // Start is called before the first frame update
     void Start() //inicia todo
@@ -107,15 +108,36 @@ public class Player : MonoBehaviour
         gridposition = playerRB.position;
         estelaLuz.InsertarI(gridposition);
 
-        if (estelaLuz.size >= estelaSize +1) //si la estela se hace mas grande de lo que deberia
+        //crear los cubos (tanto en dibujo como en lista(cubo y direccion))
+        for (int i =0; i<estelaLuz.size; i++)
         {
+            //asignar posicion de la estela
+            SimpleNode<Vector2> node = estelaLuz.Get(i);
+            Vector2 estelaPosition= node.dato;
+            Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+            
+            //crear el cubo
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = position;
+            //cambiar el color de la estela
+            Renderer cubeRenderer = cube.GetComponent<Renderer>();
+            cubeRenderer.material.color = Color.cyan;
+            cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+
+            //insertar el cubo en la lista para manejarlo desde ahi
+            spriteEstela.InsertarI(cube);
+            
+            
+        }
+
+        if (estelaLuz.size > estelaSize ) //si la estela se hace mas grande de lo que deberia
+        {
+            //se obtiene el nodo con la ultima estela
+            SimpleNode<GameObject> lastEstela = spriteEstela.Get(spriteEstela.size -1);
+            Destroy(lastEstela.dato);
             estelaLuz.EliminarF(); //se elimina la ultima posicion de estela
         }
 
-        for (int i =0; i<estelaLuz.size; i++)
-        {
-            
-        }
 
         Vector2 normalizedMoveInput = moveInput.normalized; //vector normalizado para evitar errores
 
