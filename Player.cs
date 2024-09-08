@@ -1,5 +1,5 @@
 using System;
-
+using TMPro;
 using Tron;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -7,6 +7,7 @@ using UnityEditor.Tilemaps;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -26,12 +27,15 @@ public class Player : MonoBehaviour
     [SerializeField] private float speed = 20f; //maneja la rapidez del jugador
 
     private Rigidbody2D playerRB; //RigidBody del player
+
+    private Collider2D playerHitBox;
     private Vector2 moveInput; //recibe los inputs para mover
+    private Boolean isMoving = true;
 
     //atributos para la lista enlazada "estelaLuz"
     private LinkedList<Vector2> estelaLuz = new LinkedList<Vector2>();
     private LinkedList<GameObject> spriteEstela = new LinkedList<GameObject>();
-    private int estelaSize =1;
+    private int estelaSize =30;
 
 
 
@@ -46,98 +50,70 @@ public class Player : MonoBehaviour
     {
         playerRB = GetComponent<Rigidbody2D>(); //asigna el RigidBody
         moveInput = Vector2.up; //inicia con una direcion predeterminada
+        // Verifica si el jugador ya tiene un BoxCollider2D
+        playerHitBox = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
     void Update() //actualiza lo que ocurre
     {
+        Direccionar();
+    }
 
-        xInput = Input.GetAxisRaw("Horizontal"); //obtiene inputs para el movimiento en x (recibe 1)
-        yInput = Input.GetAxisRaw("Vertical"); // mismo pero vertical (recibe -1)
-        
-        if (xInput != 0f || yInput != 0f) //si la entrada x || y es distinta a 0 
-        {
-            CalcularTargetPosition(); //calcula a donde se quiere mover
-        }
+    void Direccionar() //da la direccion a la que se dirige
+    {
 
-        else
-        {
-            targetPosition = moveInput;
-        }
+        if (isMoving == true)
 
-        //ahora se cambia la direccion dependiendo del input
-        //los !isFacing... son para verificar que el personaje no se "devuelva"
-        if (Input.GetKeyDown(KeyCode.UpArrow) && !isFacingDown) 
-        {
-            moveInput = Vector2.up; //lo gira arriba y cambia su direccion
-            flip();
-        }
+            {
 
-        else if (Input.GetKeyDown(KeyCode.DownArrow) &&! isFacingUp )
-        {
-            moveInput = Vector2.down; //lo mismo pero abajo
-            flip();
-        }
+                xInput = Input.GetAxisRaw("Horizontal"); //obtiene inputs para el movimiento en x (recibe 1)
+                yInput = Input.GetAxisRaw("Vertical"); // mismo pero vertical (recibe -1)
+                
+                if (xInput != 0f || yInput != 0f) //si la entrada x || y es distinta a 0 
+                {
+                    CalcularTargetPosition(); //calcula a donde se quiere mover
+                }
 
-        else if (Input.GetKeyDown(KeyCode.LeftArrow) &&! isFacingRight)
-        {
-            moveInput = Vector2.left; //lo mismo pero izquierda
-            flip();
-        }
+                else
+                {
+                    targetPosition = moveInput;
+                }
 
-        else if (Input.GetKeyDown(KeyCode.RightArrow) &&! isFacingLeft)
-        {
-            moveInput = Vector2.right; //lo mismo pero derecha
-            flip();
-        }
+                //ahora se cambia la direccion dependiendo del input
+                //los !isFacing... son para verificar que el personaje no se "devuelva"
+                if (Input.GetKeyDown(KeyCode.UpArrow) && !isFacingDown) 
+                {
+                    moveInput = Vector2.up; //lo gira arriba y cambia su direccion
+                    flip();
+                }
 
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            speed = 40f;
-            Console.WriteLine("cambie");
-        }
+                else if (Input.GetKeyDown(KeyCode.DownArrow) &&! isFacingUp )
+                {
+                    moveInput = Vector2.down; //lo mismo pero abajo
+                    flip();
+                }
+
+                else if (Input.GetKeyDown(KeyCode.LeftArrow) &&! isFacingRight)
+                {
+                    moveInput = Vector2.left; //lo mismo pero izquierda
+                    flip();
+                }
+
+                else if (Input.GetKeyDown(KeyCode.RightArrow) &&! isFacingLeft)
+                {
+                    moveInput = Vector2.right; //lo mismo pero derecha
+                    flip();
+                }
+
+            }
     
-        
-        
     }
 
     private void FixedUpdate() //intervalos de actualizacion fijas
     {
-
-        // se agrega la posicion del jugador a la lista de la estela
-        gridposition = playerRB.position;
-        estelaLuz.InsertarI(gridposition);
-
-        //crear los cubos (tanto en dibujo como en lista(cubo y direccion))
-        for (int i =0; i<estelaLuz.size; i++)
-        {
-            //asignar posicion de la estela
-            SimpleNode<Vector2> node = estelaLuz.Get(i);
-            Vector2 estelaPosition= node.dato;
-            Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
-            
-            //crear el cubo
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.position = position;
-            //cambiar el color de la estela
-            Renderer cubeRenderer = cube.GetComponent<Renderer>();
-            cubeRenderer.material.color = Color.cyan;
-            cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
-
-            //insertar el cubo en la lista para manejarlo desde ahi
-            spriteEstela.InsertarI(cube);
-            
-            
-        }
-
-        if (estelaLuz.size > estelaSize ) //si la estela se hace mas grande de lo que deberia
-        {
-            //se obtiene el nodo con la ultima estela
-            SimpleNode<GameObject> lastEstela = spriteEstela.Get(spriteEstela.size -1);
-            Destroy(lastEstela.dato);
-            estelaLuz.EliminarF(); //se elimina la ultima posicion de estela
-        }
-
+        Limites();
+        GenerarEstela();
 
         Vector2 normalizedMoveInput = moveInput.normalized; //vector normalizado para evitar errores
 
@@ -145,8 +121,132 @@ public class Player : MonoBehaviour
 
         //mover al personaje
         playerRB.MovePosition(playerRB.position + normalizedMoveInput * speed * Time.fixedDeltaTime); //obtiene la posicion, le suma el vector multiplicado por la velocidad
-        
+    }
+    
 
+    void Limites()
+    {
+
+        if (playerRB.position.x < 1)
+        {
+            isMoving = false;
+        }
+
+        if (playerRB.position.y < 1)
+        {
+            isMoving = false;
+        }
+
+        if (playerRB.position.x > 48)
+        {
+            isMoving = false;
+        }
+
+        if (playerRB.position.y >48 )
+        {
+            isMoving = false;
+        }
+    }
+
+    void GenerarEstela()
+    {
+        if (isMoving == true)
+        { 
+            // se agrega la posicion del jugador a la lista de la estela
+            gridposition = playerRB.position;
+            estelaLuz.InsertarI(gridposition);
+
+            //crear los cubos (tanto en dibujo como en lista(cubo y direccion))
+            for (int i =0; i<estelaLuz.size; i++)
+            {
+                if (isFacingUp == true)
+                {
+                    //asignar posicion de la estela
+                    SimpleNode<Vector2> node = estelaLuz.Get(i);
+                    Vector2 estelaPosition= node.dato;
+                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+                    
+                    //crear el cubo
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = position;
+                    //cambiar el color de la estela
+                    Renderer cubeRenderer = cube.GetComponent<Renderer>();
+                    cubeRenderer.material.color = Color.cyan;
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+
+                    //insertar el cubo en la lista para manejarlo desde ahi
+                    spriteEstela.InsertarI(cube);
+                }
+
+                else if (isFacingDown)
+                {
+                    //asignar posicion de la estela
+                    SimpleNode<Vector2> node = estelaLuz.Get(i);
+                    Vector2 estelaPosition= node.dato;
+                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+                    
+                    //crear el cubo
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = position;
+                    //cambiar el color de la estela
+                    Renderer cubeRenderer = cube.GetComponent<Renderer>();
+                    cubeRenderer.material.color = Color.cyan;
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+
+                    //insertar el cubo en la lista para manejarlo desde ahi
+                    spriteEstela.InsertarI(cube);
+                }
+
+                else if (isFacingRight)
+                {
+                    //asignar posicion de la estela
+                    SimpleNode<Vector2> node = estelaLuz.Get(i);
+                    Vector2 estelaPosition= node.dato;
+                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+                    
+                    //crear el cubo
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = position;
+                    //cambiar el color de la estela
+                    Renderer cubeRenderer = cube.GetComponent<Renderer>();
+                    cubeRenderer.material.color = Color.cyan;
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+
+                    //insertar el cubo en la lista para manejarlo desde ahi
+                    spriteEstela.InsertarI(cube);
+                }
+
+                else if (isFacingLeft)
+                {
+                    //asignar posicion de la estela
+                    SimpleNode<Vector2> node = estelaLuz.Get(i);
+                    Vector2 estelaPosition= node.dato;
+                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+                    
+                    //crear el cubo
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = position;
+                    //cambiar el color de la estela
+                    Renderer cubeRenderer = cube.GetComponent<Renderer>();
+                    cubeRenderer.material.color = Color.cyan;
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+
+                    //insertar el cubo en la lista para manejarlo desde ahi
+                    spriteEstela.InsertarI(cube);
+                }
+
+                if (spriteEstela.size > estelaSize ) //si la estela se hace mas grande de lo que deberia
+                {
+                    //se obtiene el nodo con la ultima estela
+                    SimpleNode<GameObject> lastEstela = spriteEstela.Get(spriteEstela.size -1);
+                    Destroy(lastEstela.dato);
+                    estelaLuz.EliminarF(); //se elimina la ultima posicion de estela
+                    spriteEstela.EliminarF();
+                }
+                
+                
+            }
+        }
     }
 
     private void CalcularTargetPosition() //metodo para calcular la posicion a la que quiere moverse
@@ -223,5 +323,22 @@ public class Player : MonoBehaviour
             
             
     }
-}
+
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Verifica si el objeto con el que colisionó tiene el tag "Enemigos"
+        if (collision.gameObject.CompareTag("Enemigos"))
+        {
+            // Destruye la moto del jugador
+            Destroy(gameObject);
+            Destroy(collision.gameObject);
+
+        }
+
+
+
+
+    }
 }
