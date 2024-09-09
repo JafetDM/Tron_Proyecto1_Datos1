@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography;
 using TMPro;
 using Tron;
 using Unity.VisualScripting;
@@ -37,8 +38,13 @@ public class Player : MonoBehaviour
     private LinkedList<GameObject> spriteEstela = new LinkedList<GameObject>();
     private int estelaSize =30;
 
+    //atributos para la stack de los items
 
+    
 
+    System.Random random = new System.Random();
+
+    private float combustible = 1000f;
 
 
 
@@ -58,6 +64,17 @@ public class Player : MonoBehaviour
     void Update() //actualiza lo que ocurre
     {
         Direccionar();
+        combustible -= 0.2f;
+
+        if (combustible <=0)
+        {
+            Destroy(gameObject);
+        }
+
+        if (isMoving == false)
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Direccionar() //da la direccion a la que se dirige
@@ -121,8 +138,9 @@ public class Player : MonoBehaviour
 
         //mover al personaje
         playerRB.MovePosition(playerRB.position + normalizedMoveInput * speed * Time.fixedDeltaTime); //obtiene la posicion, le suma el vector multiplicado por la velocidad
+        
     }
-    
+
 
     void Limites()
     {
@@ -169,6 +187,7 @@ public class Player : MonoBehaviour
                     //crear el cubo
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.position = position;
+                    cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
@@ -188,6 +207,7 @@ public class Player : MonoBehaviour
                     //crear el cubo
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.position = position;
+                    cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
@@ -207,6 +227,7 @@ public class Player : MonoBehaviour
                     //crear el cubo
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.position = position;
+                    cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
@@ -226,6 +247,7 @@ public class Player : MonoBehaviour
                     //crear el cubo
                     GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     cube.transform.position = position;
+                    cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
@@ -331,14 +353,45 @@ public class Player : MonoBehaviour
         // Verifica si el objeto con el que colisionó tiene el tag "Enemigos"
         if (collision.gameObject.CompareTag("Enemigos"))
         {
-            // Destruye la moto del jugador
+            // Destruye la moto del jugador y la estela
+            
+            Destroy(gameObject);
+            Destroy(collision.gameObject); //destruye la otra moto
+
+        }
+
+        if (collision.gameObject.CompareTag("Item"))
+        {
+            int numAleatorio = random.Next(0,3);
+            if (numAleatorio == 0) //el item es de aumento de estela
+            {
+                estelaSize += 30*random.Next(0,11);
+            }
+
+            if (numAleatorio == 1) //el item es de celda de combustible
+            {
+                combustible =+ random.Next(0,31);
+            }
+
+            if (numAleatorio ==2)
+
+            {
+                Destroy(gameObject);
+            }
+            
+            Destroy(collision.gameObject); //elimina el item del mapa
+        }
+
+        if (collision.gameObject.CompareTag("cubo"))
+        {
             Destroy(gameObject);
             Destroy(collision.gameObject);
-
         }
 
 
 
 
     }
+
+
 }
