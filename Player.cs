@@ -1,4 +1,5 @@
 using System;
+
 using System.Security.Cryptography;
 using TMPro;
 using Tron;
@@ -43,6 +44,12 @@ public class Player : MonoBehaviour
     private LinkedList<GameObject> spriteEstela = new LinkedList<GameObject>();
     private int estelaSize =30;
 
+    private Cola<int> itemcola = new Cola<int>();
+
+    private Stack<int> stackpoder = new Stack<int>();
+    private Stack<int> stackauxiliar = new Stack<int>();
+
+
     //atributos para la stack de los items
 
     
@@ -63,6 +70,7 @@ public class Player : MonoBehaviour
         moveInput = Vector2.up; //inicia con una direcion predeterminada
         // Verifica si el jugador ya tiene un BoxCollider2D
         playerHitBox = GetComponent<Collider2D>();
+        
 
     }
 
@@ -85,7 +93,47 @@ public class Player : MonoBehaviour
         }
 
         
+
+        if (stackpoder.list.size != 0)
+        {
+
+            
+            if(Input.GetKeyDown(KeyCode.A))
+            {
+                float timer = 0f;
+                float duration = 3f;
+                speed = 35f;
+                timer += Time.deltaTime; // Aumentar el temporizador
+
+                if (timer >= duration)
+                {
+                    // Acción a realizar después de 3 segundos
+                    speed = 20f;
+                    timer = 0f; // Reiniciar el temporizador
+                }
+            
+
+            }
+        
+
+            if(Input.GetKeyDown(KeyCode.S))
+            {
+                // Obtener todos los colliders en la escena
+                Collider2D[] colliders = FindObjectsOfType<Collider2D>();
+
+                // Ignorar colisiones con todos los colliders
+                foreach (var collider in colliders)
+                {
+                    // Ignorar la colisión entre este objeto y el collider
+                    Physics2D.IgnoreCollision(GetComponent<Collider2D>(), collider);
+                }
+            }
+        }
+
+        
     }
+
+
 
     void Direccionar() //da la direccion a la que se dirige
     {
@@ -392,7 +440,11 @@ public class Player : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Item"))
         {
+            
+
             int numAleatorio = random.Next(0,3);
+            itemcola.enqueue(numAleatorio);
+
             if (numAleatorio == 0) //el item es de aumento de estela
             {
                 estelaSize += 30*random.Next(0,11);
@@ -409,6 +461,7 @@ public class Player : MonoBehaviour
                 Destroy(gameObject);
             }
             
+            
             Destroy(collision.gameObject); //elimina el item del mapa
         }
 
@@ -416,6 +469,20 @@ public class Player : MonoBehaviour
         {
             Destroy(gameObject);
             Destroy(collision.gameObject);
+        }
+
+        if (collision.gameObject.CompareTag("boost"))
+        {
+            Vector2 newPos = new Vector2 (-5f,33f);
+            collision.transform.position = newPos;
+            stackpoder.push(1);
+        }
+
+        if (collision.gameObject.CompareTag("escudo"))
+        {
+            Vector2 newPos = new Vector2 (-5f,23f);
+            collision.transform.position = newPos;
+            stackpoder.push(2);
         }
         
 
