@@ -16,6 +16,8 @@ public class Player : MonoBehaviour
     //atributos
 
     private Vector2 gridposition;
+
+    public GameObject Cube;
     private Vector2 targetPosition; //vector unitario para mantener el target de donde deberia posicionarse
     private float xInput, yInput; //input del movimiento
 
@@ -30,6 +32,9 @@ public class Player : MonoBehaviour
     private Rigidbody2D playerRB; //RigidBody del player
 
     private Collider2D playerHitBox;
+
+    private BoxCollider2D cuboHitBox;
+
     private Vector2 moveInput; //recibe los inputs para mover
     private Boolean isMoving = true;
 
@@ -58,13 +63,16 @@ public class Player : MonoBehaviour
         moveInput = Vector2.up; //inicia con una direcion predeterminada
         // Verifica si el jugador ya tiene un BoxCollider2D
         playerHitBox = GetComponent<Collider2D>();
+
     }
 
     // Update is called once per frame
     void Update() //actualiza lo que ocurre
     {
+
         Direccionar();
         combustible -= 0.2f;
+
 
         if (combustible <=0)
         {
@@ -75,6 +83,8 @@ public class Player : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        
     }
 
     void Direccionar() //da la direccion a la que se dirige
@@ -129,6 +139,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate() //intervalos de actualizacion fijas
     {
+
         Limites();
         GenerarEstela();
 
@@ -172,7 +183,9 @@ public class Player : MonoBehaviour
         { 
             // se agrega la posicion del jugador a la lista de la estela
             gridposition = playerRB.position;
+            //gridposition.y -= 2;
             estelaLuz.InsertarI(gridposition);
+
 
             //crear los cubos (tanto en dibujo como en lista(cubo y direccion))
             for (int i =0; i<estelaLuz.size; i++)
@@ -182,16 +195,21 @@ public class Player : MonoBehaviour
                     //asignar posicion de la estela
                     SimpleNode<Vector2> node = estelaLuz.Get(i);
                     Vector2 estelaPosition= node.dato;
-                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
+                    Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y-0, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(playerHitBox, cubeColl);
+                    
                     cube.transform.position = position;
                     cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
-                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y-0})";
+                    
 
                     //insertar el cubo en la lista para manejarlo desde ahi
                     spriteEstela.InsertarI(cube);
@@ -205,13 +223,17 @@ public class Player : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(playerHitBox, cubeColl);
+
                     cube.transform.position = position;
                     cube.tag = "cubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.cyan;
-                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y})";
+                    cube.name = $"EstelaNode ({estelaPosition.x},{estelaPosition.y+2})";
 
                     //insertar el cubo en la lista para manejarlo desde ahi
                     spriteEstela.InsertarI(cube);
@@ -225,7 +247,11 @@ public class Player : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(playerHitBox, cubeColl);
+
                     cube.transform.position = position;
                     cube.tag = "cubo";
                     //cambiar el color de la estela
@@ -245,7 +271,11 @@ public class Player : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(playerHitBox, cubeColl);
+
                     cube.transform.position = position;
                     cube.tag = "cubo";
                     //cambiar el color de la estela
@@ -382,13 +412,12 @@ public class Player : MonoBehaviour
             Destroy(collision.gameObject); //elimina el item del mapa
         }
 
-        if (collision.gameObject.CompareTag("cubo"))
+        if (collision.gameObject.CompareTag("Ecubo"))
         {
             Destroy(gameObject);
             Destroy(collision.gameObject);
         }
-
-
+        
 
 
     }
