@@ -30,6 +30,10 @@ public class EnemyScript : MonoBehaviour
 
     private Rigidbody2D enemyRB; //RigidBody del player
 
+    private Collider2D boxCollider2D;
+
+    public GameObject Cube;
+
     private Vector2 moveInput; //recibe los inputs para mover
     private Boolean isMoving = true;
 
@@ -46,6 +50,8 @@ public class EnemyScript : MonoBehaviour
     void Start()
     {
         enemyRB = GetComponent<Rigidbody2D>(); //asigna el RigidBody
+        boxCollider2D = GetComponent<BoxCollider2D>();
+
         moveInput = Vector2.up; //inicia con una direcion predeterminada
         StartCoroutine(GenerarInputsCadaDosSegundos());
     }
@@ -59,6 +65,11 @@ public class EnemyScript : MonoBehaviour
         combustible -= 0.2f;
 
         if (combustible <=0)
+        {
+            Destroy(gameObject);
+        }
+
+        if (isMoving == false)
         {
             Destroy(gameObject);
         }
@@ -179,14 +190,13 @@ public class EnemyScript : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(boxCollider2D, cubeColl);
+
                     cube.transform.position = position;
-                    cube.tag = "cubo";
-                    BoxCollider2D boxCollider = cube.GetComponent<BoxCollider2D>();
-                    if (boxCollider == null)
-                    {
-                        boxCollider = cube.AddComponent<BoxCollider2D>();
-                    }
+                    cube.tag = "Ecubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.yellow;
@@ -204,14 +214,13 @@ public class EnemyScript : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(boxCollider2D, cubeColl);
+
                     cube.transform.position = position;
-                    cube.tag = "cubo";
-                    BoxCollider2D boxCollider = cube.GetComponent<BoxCollider2D>();
-                    if (boxCollider == null)
-                    {
-                        boxCollider = cube.AddComponent<BoxCollider2D>();
-                    }
+                    cube.tag = "Ecubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.yellow;
@@ -229,15 +238,13 @@ public class EnemyScript : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.position = position;
-                    cube.tag = "cubo";
-                    BoxCollider2D boxCollider = cube.GetComponent<BoxCollider2D>();
-                    if (boxCollider == null)
-                    {
-                        boxCollider = cube.AddComponent<BoxCollider2D>();
-                    }
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
 
+                    Physics2D.IgnoreCollision(boxCollider2D, cubeColl);
+
+                    cube.transform.position = position;
+                    cube.tag = "Ecubo";
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.yellow;
@@ -255,14 +262,14 @@ public class EnemyScript : MonoBehaviour
                     Vector3 position = new Vector3(estelaPosition.x, estelaPosition.y, 3);
                     
                     //crear el cubo
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(Cube);
+                    BoxCollider2D cubeColl = cube.GetComponent<BoxCollider2D>();
+
+                    Physics2D.IgnoreCollision(boxCollider2D, cubeColl);
+
                     cube.transform.position = position;
-                    cube.tag = "cubo";
-                    BoxCollider2D boxCollider = cube.GetComponent<BoxCollider2D>();
-                    if (boxCollider == null)
-                    {
-                        boxCollider = cube.AddComponent<BoxCollider2D>();
-                    }
+                    cube.tag = "Ecubo";
+                    
                     //cambiar el color de la estela
                     Renderer cubeRenderer = cube.GetComponent<Renderer>();
                     cubeRenderer.material.color = Color.yellow;
